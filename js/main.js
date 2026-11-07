@@ -338,5 +338,10 @@ async function boot() {
 }
 boot();
 
+// Keep a copy on the device so the game works offline (and can be added to the home screen).
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  navigator.serviceWorker.register('sw.js').catch(() => { /* still playable without it */ });
+}
+
 // handy for automated checks
 window.__railWords = { world, state, startLevel, coach, LEVELS };

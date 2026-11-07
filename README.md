@@ -12,6 +12,15 @@ up hills, through loops, and upside down.
 
 It works **with Wi-Fi turned off**. Nothing is installed, and the game does not need an account.
 
+## Play on a phone or tablet
+
+Open **https://honeyreddydaram.github.io/English/** in the phone's browser (Safari on iPhone, Chrome on Android).
+
+- **Add it to the home screen** for an app-like icon: on iPhone, tap Share → *Add to Home Screen*; on Android,
+  tap ⋮ → *Add to Home screen* / *Install app*.
+- After the first visit, it **works offline**: the game keeps a copy of itself on the phone.
+- The page only downloads the game. It never sends anything back, and progress stays on each device.
+
 ## The 10 stations (easy → hard)
 
 | # | Station | Skill | Track |
