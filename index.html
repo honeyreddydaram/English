@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Privacy lock: this page may only load files from this computer and may not send data anywhere else. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-UIiVg22PC4ABTdJ22WSTrliOLGvfsog+qnGKL+MGxbk='; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Rail Words</title>
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/"}}</script>
+<script type="module" src="js/main.js"></script>
+</head>
+<body>
+<canvas id="world" aria-hidden="true"></canvas>
+
+<!-- Top bar while playing -->
+<header id="hud" class="hidden">
+  <button id="btn-map" class="chip" aria-label="Back to the station map">🗺️</button>
+  <div class="hud-title">
+    <div id="hud-level"></div>
+    <div id="hud-skill"></div>
+  </div>
+  <div id="hud-pieces" aria-label="Track pieces built"></div>
+  <button id="btn-ride" class="chip ride" aria-label="Ride Time: take a break and watch the train">🚂 <span>Ride Time</span></button>
+  <button id="btn-sound" class="chip" aria-label="Sound on or off">🔊</button>
+</header>
+
+<!-- Conductor Pip -->
+<div id="pip" class="hidden" aria-live="polite">
+  <div id="bubble" class="bubble"></div>
+  <svg id="pip-face" viewBox="0 0 120 130" role="img" aria-label="Conductor Pip">
+    <ellipse cx="60" cy="124" rx="34" ry="5" fill="#000" opacity=".08"/>
+    <path d="M22 118c3-22 18-30 38-30s35 8 38 30z" fill="#3d5a8c"/>
+    <path d="M52 92l8 12 8-12z" fill="#f4d35e"/>
+    <circle cx="60" cy="66" r="34" fill="#f6cfa8"/>
+    <circle cx="27" cy="70" r="7" fill="#f6cfa8"/>
+    <circle cx="93" cy="70" r="7" fill="#f6cfa8"/>
+    <ellipse cx="42" cy="78" rx="7" ry="4.5" fill="#f2a29a" opacity=".55"/>
+    <ellipse cx="78" cy="78" rx="7" ry="4.5" fill="#f2a29a" opacity=".55"/>
+    <g id="pip-eyes">
+      <ellipse cx="47" cy="66" rx="4.2" ry="5.2" fill="#2e2a33"/>
+      <ellipse cx="73" cy="66" rx="4.2" ry="5.2" fill="#2e2a33"/>
+      <circle cx="48.4" cy="64.2" r="1.4" fill="#fff"/>
+      <circle cx="74.4" cy="64.2" r="1.4" fill="#fff"/>
+    </g>
+    <path d="M44 56q3-3 7 0M69 56q4-3 7 0" stroke="#8a5a3b" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <g id="pip-mouth"><path d="M49 80q11 10 22 0q-11 4-22 0z" fill="#b8574f"/></g>
+    <path d="M26 46q34-26 68 0v6H26z" fill="#2f4a7a"/>
+    <rect x="22" y="48" width="76" height="9" rx="4.5" fill="#25406b"/>
+    <path d="M30 57h60q-4 6-30 6t-30-6z" fill="#1f3558"/>
+    <circle cx="60" cy="40" r="6" fill="#f4d35e"/>
+    <path d="M57 40h6M60 37v6" stroke="#c99a2e" stroke-width="1.6"/>
+  </svg>
+</div>
+
+<!-- The question card -->
+<section id="card" class="hidden" aria-live="polite">
+  <div class="card-top">
+    <div id="q-word" class="q-word"></div>
+    <button id="btn-hear" class="hear" aria-label="Hear it again">🔊</button>
+  </div>
+  <div id="q-prompt" class="q-prompt"></div>
+  <div id="q-options" class="q-options"></div>
+  <div id="q-hint" class="q-hint hidden"></div>
+  <button id="btn-skip" class="soft hidden">Skip for now — we'll come back 🌱</button>
+</section>
+
+<!-- Ride Time banner -->
+<div id="ride-banner" class="hidden">
+  <span>Enjoy the ride! 🚂 Take all the time you need.</span>
+  <button id="btn-back" class="big">Back to building</button>
+</div>
+
+<!-- Title screen -->
+<section id="title" class="screen hidden">
+  <div class="panel title-panel">
+    <h1>Rail Words</h1>
+    <p class="sub">Answer word puzzles. Build the track. Ride the train!</p>
+    <button id="btn-play" class="big">Let's play! 🚂</button>
+    <button id="btn-grown" class="link">Grown-ups ⚙️</button>
+  </div>
+</section>
+
+<!-- Station map -->
+<section id="map" class="screen hidden">
+  <div class="panel map-panel">
+    <div class="map-head">
+      <h2>Pick a station</h2>
+      <button id="btn-grown2" class="link">Grown-ups ⚙️</button>
+    </div>
+    <ol id="stations"></ol>
+  </div>
+</section>
+
+<!-- Level complete -->
+<section id="done" class="screen hidden">
+  <div class="panel done-panel">
+    <div id="stamp" class="stamp"></div>
+    <h2 id="done-title"></h2>
+    <p id="done-text"></p>
+    <div class="row">
+      <button id="btn-again" class="soft">Watch the ride 🚂</button>
+      <button id="btn-next" class="big">Next station ➜</button>
+    </div>
+    <button id="btn-tomap" class="link">Station map</button>
+  </div>
+</section>
+
+<!-- Grown-ups area -->
+<dialog id="grown">
+  <div id="gate">
+    <h2>Grown-ups only</h2>
+    <p>Press and hold the button for 2 seconds.</p>
+    <button id="btn-hold" class="hold"><span></span>Hold me</button>
+    <button class="link close-grown">Close</button>
+  </div>
+  <form id="settings" class="hidden" method="dialog">
+    <h2>Settings</h2>
+    <label>Pip's voice
+      <select id="set-voice"></select>
+    </label>
+    <button type="button" id="btn-test-voice" class="soft">▶ Hear Pip</button>
+    <label>Talking speed
+      <input id="set-rate" type="range" min="0.6" max="1.05" step="0.05">
+    </label>
+    <label class="check"><input id="set-online" type="checkbox"> Allow online voices <small>(Off = Pip's voice is made on this computer; nothing is sent over the internet.)</small></label>
+    <label class="check"><input id="set-sound" type="checkbox"> Sound effects</label>
+    <label class="check"><input id="set-motion" type="checkbox"> Less motion</label>
+    <label class="check"><input id="set-unlock" type="checkbox"> Open all stations</label>
+    <label class="check disabled"><input type="checkbox" disabled> Say it with Pip (microphone) <small>Coming next. It will listen only on this laptop; your child's voice never leaves it.</small></label>
+    <div class="row">
+      <button type="button" id="btn-reset" class="link">Reset stamps</button>
+      <button class="big close-grown">Done</button>
+    </div>
+  </form>
+</dialog>
+</body>
+</html>
