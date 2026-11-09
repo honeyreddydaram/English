@@ -4,13 +4,97 @@ A 3D word game for kids aged about 5–11. Each English puzzle a child answers a
 spring track. When the track is finished, a little bullet train rides the whole thing:
 up hills, through loops, and upside down.
 
-## How to play (Windows laptop)
+## Requirements
 
-1. Double-click **`Start Game.bat`**.
-2. The game opens in your web browser (Microsoft Edge or Google Chrome) at `http://localhost:8642`.
-3. Keep the small black window open while playing. Close it to stop.
+**To play** (nothing to install):
 
-It works **with Wi-Fi turned off**. Nothing is installed, and the game does not need an account.
+| | Needed |
+|---|---|
+| Computer | Windows 10 or 11 (uses the built-in Windows PowerShell). Mac or Linux: see "Other computers" below. |
+| Browser | Microsoft Edge or Google Chrome 89+, Safari 16.4+, or Firefox 108+ |
+| Graphics | Any computer or phone that supports WebGL 2 (almost all from 2018 on) |
+| Disk space | About 3 MB |
+| Internet | Not needed on the laptop. On a phone, only for the first visit. |
+| Sound | Speakers or headphones, for Pip's voice |
+
+**To change the game or run the tests** (optional):
+
+- [Git](https://git-scm.com/downloads)
+- [Node.js](https://nodejs.org) 20.6 or newer (only for running the tests)
+- [Python 3](https://www.python.org/downloads/) (only for running the game on Mac or Linux)
+
+## Commands
+
+### 1. Get the game
+
+```bash
+git clone https://github.com/honeyreddydaram/English.git
+cd English
+git checkout claude/understanding-clarification-36y28o
+```
+
+No Git? On GitHub, open the branch `claude/understanding-clarification-36y28o`, click **Code → Download ZIP**,
+and unzip it.
+
+### 2. Play on a Windows laptop
+
+Double-click **`Start Game.bat`** in the game folder.
+
+Or run it yourself from a Command Prompt in the game folder:
+
+```bat
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\serve.ps1
+```
+
+The game opens in your browser at **http://localhost:8642**. Keep the small black window open while playing.
+Close it to stop. It works **with Wi-Fi turned off**, and it needs no install or account.
+
+### 3. Other computers (Mac or Linux)
+
+From the game folder:
+
+```bash
+python3 -m http.server 8642 --bind 127.0.0.1
+```
+
+Then open **http://localhost:8642** in your browser. Press `Ctrl+C` in the terminal to stop.
+
+The game must be opened through a local server like this. Double-clicking `index.html` will not work,
+because browsers block game modules opened straight from a file.
+
+### 4. Run the tests (optional)
+
+Checks every track joins into a loop, never crashes into itself, and stays above the table:
+
+```bash
+node --import ./tests/three-loader.mjs tests/track.test.mjs
+```
+
+Checks the question file is valid:
+
+```bash
+node -e "const q=require('./data/questions.json');let n=0;for(const k in q)for(const x of q[k]){n++;if(x.answer<0||x.answer>=x.options.length)throw new Error('bad answer in station '+k)}console.log(n+' questions OK')"
+```
+
+### 5. Save your changes to GitHub
+
+```bash
+git add -A
+git commit -m "Describe what you changed"
+git push origin claude/understanding-clarification-36y28o
+```
+
+If you changed any game file, also change `VERSION` at the top of `sw.js` (for example `rail-words-v2`)
+so phones that installed the game download the update.
+
+### 6. Put it online for phones (GitHub Pages, one time)
+
+1. Open https://github.com/honeyreddydaram/English/settings/pages
+2. **Source:** *Deploy from a branch*
+3. **Branch:** `claude/understanding-clarification-36y28o`, folder `/ (root)`, then **Save**
+4. After 1–2 minutes the game is live at https://honeyreddydaram.github.io/English/
+
+Every later `git push` to that branch updates the website automatically.
 
 ## Play on a phone or tablet
 
@@ -68,7 +152,7 @@ Tap **Grown-ups ⚙️** and hold the button for 2 seconds. You can choose Pip's
 turn sound effects and motion down, open all stations, or reset stamps.
 
 **About Pip's voice:** the list shows the voices installed on this computer (on Windows, usually
-Microsoft Zira, David and Mark). Pip speaks slowly and slightly softer than normal; use "Hear Pip" to
+Microsoft Zira, David and Mark). Pip speaks a little slower than normal; use "Hear Pip" to
 pick the one you like best. Microsoft Edge also offers more natural-sounding "Online" voices. If you
 allow those, only Pip's sentences are sent to Microsoft to be spoken. Nothing your child says or does
 is sent.
@@ -87,5 +171,6 @@ Only official, unmodified releases are used:
 - `js/trackMesh.js`: block, spring, hole and post geometry
 - `js/coach.js`: Pip's gentle feedback, hint ladder, and patience timers
 - `js/main.js`: screens and level flow
-- `tests/track.test.mjs`: checks every track closes, never crashes into itself, and stays above the table.
-  Run with `node --import ./tests/three-loader.mjs tests/track.test.mjs`
+- `tests/track.test.mjs`: track checks (see "Run the tests" above)
+- `tools/serve.ps1`: the small local server used by `Start Game.bat`
+- `sw.js`, `manifest.webmanifest`: offline copy and home-screen install for phones
